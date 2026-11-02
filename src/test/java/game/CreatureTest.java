@@ -1,6 +1,8 @@
 package game;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,6 +64,26 @@ public class CreatureTest {
         assertEquals(100, creature.hp());
         assertEquals("something not awful", creature.causeOfDeath());
         assertSame(creature, world.creature(1, 1, 0));
+    }
+
+    @Test
+    void testDeathNotification(){
+        List<String> notifications = new ArrayList<>();
+        //writing this garbage was the only way i could get this to work
+        //is there a better way to do this? probably, but im also very dumb so...
+        new CreatureAi(creature) {
+            @Override
+            public void onNotify(String message){
+                notifications.add(message);
+            }
+        };
+
+        world.add(creature);
+        creature.modifyHp(-100, "something pretty bad");
+
+        assertEquals(0, creature.hp());
+        assertTrue(notifications.contains("You die."));
+
     }
 
 }
