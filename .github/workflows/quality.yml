@@ -9,6 +9,10 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
 
     steps:
       - name: Check out repository
@@ -36,3 +40,13 @@ jobs:
         with:
           name: pit-report
           path: target/pit-reports/
+
+      - name: Run SpotBugs with SARIF output
+        run: ./mvnw --batch-mode spotbugs:spotbugs
+
+      - name: Upload SpotBugs results to code scanning
+        if: ${{ always() && hashFiles('target/spotbugs.sarif') != '' }}
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: target/spotbugs.sarif
+          category: spotbugs

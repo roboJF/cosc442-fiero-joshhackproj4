@@ -69,6 +69,21 @@
             </plugin>
 
             <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.10.5.0</version>
+
+                <configuration>
+                    <includeTests>false</includeTests>
+                    <sarifOutput>true</sarifOutput>
+                    <sarifFullPath>true</sarifFullPath>
+                    <sarifOutputDirectory>${project.build.directory}</sarifOutputDirectory>
+                    <sarifOutputFilename>spotbugs.sarif</sarifOutputFilename>
+                    <skipEmptyReport>false</skipEmptyReport>
+                </configuration>
+            </plugin>
+
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.6.4</version>
