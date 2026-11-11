@@ -247,17 +247,39 @@ class InventoryTest {
         assertArrayEquals(new Item[] { item, null }, inventory.getItems());
     }
 
-    // Writes directly through getItems(), then reads the inventory through its other methods.
     @Test
-    void getItemsExposesTheBackingArray() {
-        Inventory inventory = new Inventory(1);
+    void changingReturnedSlotsDoesNotChangeTheInventory() {
+        Inventory inventory = new Inventory(2);
         Item item = item("item");
+        Item replacement = item("replacement");
+        inventory.add(item);
+        Item[] snapshot = inventory.getItems();
+        assertSame(item, snapshot[0]);
 
-        inventory.getItems()[0] = item;
+        snapshot[0] = replacement;
+        snapshot[1] = replacement;
 
         assertAll(
                 () -> assertSame(item, inventory.get(0)),
+                () -> assertNull(inventory.get(1)),
                 () -> assertTrue(inventory.contains(item)),
-                () -> assertTrue(inventory.isFull()));
+                () -> assertFalse(inventory.contains(replacement)),
+                () -> assertFalse(inventory.isFull()));
+    }
+
+    @Test
+    void returnedSlotsAreAStableSnapshotWhileItemIdentityIsPreserved() {
+        Inventory inventory = new Inventory(1);
+        Item original = item("original");
+        Item replacement = item("replacement");
+        inventory.add(original);
+        Item[] snapshot = inventory.getItems();
+
+        inventory.remove(original);
+        inventory.add(replacement);
+
+        assertSame(original, snapshot[0]);
+        assertSame(replacement, inventory.get(0));
+        assertSame(replacement, inventory.getItems()[0]);
     }
 }

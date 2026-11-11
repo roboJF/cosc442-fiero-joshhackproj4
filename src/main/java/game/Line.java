@@ -5,8 +5,11 @@ import java.util.Iterator;
 import java.util.List;
 
 public class Line implements Iterable<Point> {
-	private List<Point> points;
-	public List<Point> getPoints() { return points; }
+	private final List<Point> points;
+	/** Returns an unmodifiable sequence with independently owned coordinates. */
+	public List<Point> getPoints() {
+		return points.stream().map(point -> new Point(point.x, point.y, point.z)).toList();
+	}
 	
 	public Line(int x0, int y0, int x1, int y1) {
 		points = new ArrayList<Point>();
@@ -38,6 +41,6 @@ public class Line implements Iterable<Point> {
 
 	@Override
 	public Iterator<Point> iterator() {
-		return points.iterator();
+		return getPoints().iterator();
 	}
 }

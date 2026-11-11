@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class World {
-	private Tile[][][] tiles;
+	private final Tile[][][] tiles;
 	private Item[][][] items;
 	
 	private int width;
@@ -20,7 +20,14 @@ public class World {
 	private List<Creature> creatures;
 	
 	public World(Tile[][][] tiles){
-		this.tiles = tiles;
+		// Own every array level; Tile enum values themselves can be shared.
+		this.tiles = tiles.clone();
+		for (int x = 0; x < tiles.length; x++) {
+			this.tiles[x] = tiles[x].clone();
+			for (int y = 0; y < tiles[x].length; y++) {
+				this.tiles[x][y] = tiles[x][y].clone();
+			}
+		}
 		this.width = tiles.length;
 		this.height = tiles[0].length;
 		this.depth = tiles[0][0].length;

@@ -3,7 +3,6 @@ package ui;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
-import java.util.Arrays;
 
 import game.Creature;
 import game.CreatureAi;
@@ -42,7 +41,14 @@ class ReadSpellScreenTest {
         player.modifyMana(95);
         book = new StuffFactory(world).newWhiteMagesSpellbook(0);
         // Spell letters must not depend on the inventory slot containing the book.
-        player.inventory().getItems()[3] = book;
+        Item placeholder = new Item('?', Color.GRAY, "placeholder", null);
+        for (int slot = 0; slot < 3; slot++) {
+            player.inventory().add(placeholder);
+        }
+        player.inventory().add(book);
+        for (int slot = 0; slot < 3; slot++) {
+            player.inventory().remove(placeholder);
+        }
     }
 
     private KeyEvent letter(char letter) {
@@ -69,21 +75,25 @@ class ReadSpellScreenTest {
     @ParameterizedTest
     @ValueSource(chars = {'e', 't', 'z', '?'})
     void invalidSelectionStaysOpenEvenWhenInventorySlotsAreOccupied(char letter) {
-        Arrays.fill(player.inventory().getItems(), book);
+        player.inventory().remove(book);
+        int capacity = player.inventory().getItems().length;
+        for (int slot = 0; slot < capacity; slot++) {
+            player.inventory().add(book);
+        }
         RecordingScreen screen = new RecordingScreen(player, book);
 
         assertSame(screen, screen.respondToUserInput(letter(letter)));
 
         assertNull(screen.selected);
         assertEquals(100, player.mana());
-        assertTrue(player.effects().isEmpty());
+        assertFalse(player.hasActiveEffects());
     }
 
     @Test
     void emptySpellbookDoesNotSelectOrThrow() {
         Item emptyBook = new Item('+', Color.WHITE, "empty book", null);
         RecordingScreen screen = new RecordingScreen(player, emptyBook);
-        player.inventory().getItems()[0] = book;
+        player.inventory().add(book);
 
         assertSame(screen, screen.respondToUserInput(letter('a')));
 
@@ -99,7 +109,7 @@ class ReadSpellScreenTest {
 
         assertNull(screen.selected);
         assertEquals(100, player.mana());
-        assertTrue(player.effects().isEmpty());
+        assertFalse(player.hasActiveEffects());
     }
 
     @Test
@@ -112,7 +122,7 @@ class ReadSpellScreenTest {
         assertInstanceOf(CastSpellScreen.class, targeting);
         assertEquals(40, player.hp());
         assertEquals(100, player.mana());
-        assertTrue(player.effects().isEmpty());
+        assertFalse(player.hasActiveEffects());
 
         assertNull(targeting.respondToUserInput(key(KeyEvent.VK_ENTER)));
         assertEquals(60, player.hp());
@@ -130,7 +140,7 @@ class ReadSpellScreenTest {
 
         assertEquals(40, player.hp());
         assertEquals(100, player.mana());
-        assertTrue(player.effects().isEmpty());
+        assertFalse(player.hasActiveEffects());
     }
 
     private static class RecordingScreen extends ReadSpellScreen {

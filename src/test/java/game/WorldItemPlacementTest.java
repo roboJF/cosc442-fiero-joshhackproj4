@@ -26,7 +26,6 @@ class WorldItemPlacementTest {
                 }
             }
         }
-        world = new World(tiles);
     }
 
     private Item item(String name) {
@@ -89,6 +88,7 @@ class WorldItemPlacementTest {
     @EnumSource(value = Tile.class, names = {"FLOOR", "STAIRS_UP", "STAIRS_DOWN"})
     void placesTheItemExactlyOnceOnAnEmptyUsableTile(Tile tile) {
         tiles[1][1][0] = tile;
+        world = new World(tiles);
         Item incoming = item("incoming");
         Item[][][] expected = snapshot();
         expected[1][1][0] = incoming;
@@ -103,6 +103,7 @@ class WorldItemPlacementTest {
     void occupiedOriginUsesTheOnlyAvailableNeighborWithoutOverwriting() {
         tiles[1][1][0] = Tile.FLOOR;
         tiles[2][1][0] = Tile.FLOOR;
+        world = new World(tiles);
         Item existing = item("existing");
         placeExistingItem(existing, 1, 1, 0);
         Item incoming = item("incoming");
@@ -121,6 +122,7 @@ class WorldItemPlacementTest {
         for (int x = 0; x < 3; x++) {
             tiles[x][1][0] = Tile.FLOOR;
         }
+        world = new World(tiles);
         placeExistingItem(item("origin item"), 0, 1, 0);
         placeExistingItem(item("middle item"), 1, 1, 0);
         Item incoming = item("incoming");
@@ -137,6 +139,7 @@ class WorldItemPlacementTest {
     void doesNotUseEmptySpaceOnAnotherDepth() {
         tiles[1][1][0] = Tile.FLOOR;
         tiles[1][1][1] = Tile.FLOOR;
+        world = new World(tiles);
         placeExistingItem(item("existing"), 1, 1, 1);
         Item incoming = item("incoming");
         Item[][][] before = snapshot();
@@ -153,6 +156,13 @@ class WorldItemPlacementTest {
             for (int y = 0; y < 3; y++) {
                 for (int z = 0; z < 2; z++) {
                     tiles[x][y][z] = Tile.FLOOR;
+                }
+            }
+        }
+        world = new World(tiles);
+        for (int x = 0; x < 3; x++) {
+            for (int y = 0; y < 3; y++) {
+                for (int z = 0; z < 2; z++) {
                     placeExistingItem(item("existing " + x + y + z), x, y, z);
                 }
             }
@@ -173,6 +183,7 @@ class WorldItemPlacementTest {
     })
     void invalidOriginReturnsFalseWithoutChangingItems(int x, int y, int z) {
         tiles[1][1][0] = Tile.FLOOR;
+        world = new World(tiles);
         placeExistingItem(item("existing"), 1, 1, 0);
         Item[][][] before = snapshot();
         Item incoming = item("incoming");
@@ -186,6 +197,7 @@ class WorldItemPlacementTest {
     @Test
     void wallOriginIsRejectedEvenWhenANeighborHasSpace() {
         tiles[2][1][0] = Tile.FLOOR;
+        world = new World(tiles);
         Item incoming = item("incoming");
         Item[][][] before = snapshot();
 
@@ -199,6 +211,7 @@ class WorldItemPlacementTest {
     @CsvSource({"1, 1, 0", "-1, 1, 0"})
     void nullItemIsASuccessfulNoOpEvenForAnInvalidOrigin(int x, int y, int z) {
         tiles[1][1][0] = Tile.FLOOR;
+        world = new World(tiles);
         placeExistingItem(item("existing"), 1, 1, 0);
         RecordingAi observer = observerAt("observer", 1, 1, 0);
         Item[][][] before = snapshot();
@@ -214,6 +227,7 @@ class WorldItemPlacementTest {
     void landingCreatureReceivesOneMessageUsingItsKnowledge(boolean identified, String name) {
         tiles[1][1][0] = Tile.FLOOR;
         tiles[2][1][0] = Tile.FLOOR;
+        world = new World(tiles);
         RecordingAi recipient = observerAt("recipient", 1, 1, 0);
         RecordingAi neighbor = observerAt("neighbor", 2, 1, 0);
         Item incoming = new Item('!', Color.WHITE, "healing potion", "red potion");
@@ -232,6 +246,7 @@ class WorldItemPlacementTest {
     void relocatedItemNotifiesOnlyTheCreatureAtItsActualDestination() {
         tiles[1][1][0] = Tile.FLOOR;
         tiles[2][1][0] = Tile.FLOOR;
+        world = new World(tiles);
         Item existing = item("existing");
         placeExistingItem(existing, 1, 1, 0);
         RecordingAi origin = observerAt("origin", 1, 1, 0);
@@ -250,6 +265,7 @@ class WorldItemPlacementTest {
     void emptyLandingDoesNotNotifyANearbyCreature() {
         tiles[1][1][0] = Tile.FLOOR;
         tiles[2][1][0] = Tile.FLOOR;
+        world = new World(tiles);
         RecordingAi neighbor = observerAt("neighbor", 2, 1, 0);
         Item incoming = item("incoming");
 
@@ -262,6 +278,7 @@ class WorldItemPlacementTest {
     @Test
     void failedPlacementSendsNoArrivalNotification() {
         tiles[1][1][0] = Tile.FLOOR;
+        world = new World(tiles);
         placeExistingItem(item("existing"), 1, 1, 0);
         RecordingAi observer = observerAt("observer", 1, 1, 0);
         Item incoming = item("incoming");

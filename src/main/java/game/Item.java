@@ -43,8 +43,9 @@ public class Item {
 	public Effect quaffEffect() { return quaffEffect; }
 	public void setQuaffEffect(Effect effect) { this.quaffEffect = effect; }
 	
-	private List<Spell> writtenSpells;
-	public List<Spell> writtenSpells() { return writtenSpells; }
+	private final List<Spell> writtenSpells;
+	/** Spells are added through addWrittenSpell; readers receive a stable snapshot. */
+	public List<Spell> writtenSpells() { return List.copyOf(writtenSpells); }
 	
 	public void addWrittenSpell(String name, int manaCost, Supplier<Effect> effectFactory){
 		writtenSpells.add(new Spell(name, manaCost, effectFactory));

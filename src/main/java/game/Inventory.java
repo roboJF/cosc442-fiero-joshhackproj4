@@ -2,8 +2,9 @@ package game;
 
 public class Inventory {
 
-	private Item[] items;
-	public Item[] getItems() { return items; }
+	private final Item[] items;
+	/** Returns a snapshot of the slots, retaining the live Item identities. */
+	public Item[] getItems() { return items.clone(); }
 	public Item get(int i) { return items[i]; }
 	
 	public Inventory(int max){

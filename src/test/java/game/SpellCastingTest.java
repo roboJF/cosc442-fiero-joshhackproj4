@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SpellCastingTest {
-    private Tile[][][] tiles;
     private World world;
     private Creature caster;
     private Creature target;
@@ -16,11 +15,18 @@ class SpellCastingTest {
 
     @BeforeEach
     void setUp() {
-        tiles = new Tile[5][5][1];
+        createWorld(false);
+    }
+
+    private void createWorld(boolean blocked) {
+        Tile[][][] tiles = new Tile[5][5][1];
         for (int x = 0; x < 5; x++) {
             for (int y = 0; y < 5; y++) {
                 tiles[x][y][0] = Tile.FLOOR;
             }
+        }
+        if (blocked) {
+            tiles[2][1][0] = Tile.WALL;
         }
         world = new World(tiles);
         caster = creature("caster", 1, 1);
@@ -73,10 +79,12 @@ class SpellCastingTest {
                 () -> assertEquals(96, caster.mana()),
                 () -> assertEquals(500, caster.hp()),
                 () -> assertEquals(100, target.mana()));
+        assertTrue(target.hasActiveEffects());
 
         tick(target, 1);
         assertEquals(60, target.hp());
-        assertTrue(target.effects().isEmpty());
+        assertFalse(target.hasActiveEffects());
+        assertEquals(0, target.activeEffectCount());
         assertEquals(96, caster.mana());
     }
 
@@ -99,7 +107,7 @@ class SpellCastingTest {
 
         assertEquals(400, target.hp());
         assertEquals(3, caster.mana());
-        assertTrue(target.effects().isEmpty());
+        assertFalse(target.hasActiveEffects());
     }
 
     @Test
@@ -111,7 +119,7 @@ class SpellCastingTest {
 
         assertEquals(420, target.hp());
         assertEquals(0, caster.mana());
-        assertEquals(1, target.effects().size());
+        assertEquals(1, target.activeEffectCount());
     }
 
     @Test
@@ -119,13 +127,13 @@ class SpellCastingTest {
         caster.castSpell(whiteSpell("minor heal"), 4, 4);
 
         assertEquals(100, caster.mana());
-        assertTrue(caster.effects().isEmpty());
-        assertTrue(target.effects().isEmpty());
+        assertFalse(caster.hasActiveEffects());
+        assertFalse(target.hasActiveEffects());
     }
 
     @Test
     void unseenTargetDoesNotReceiveAnEffectOrConsumeMana() {
-        tiles[2][1][0] = Tile.WALL;
+        createWorld(true);
         target.modifyHp(-100, "test injury");
         assertFalse(caster.canSee(target.x, target.y, 0));
 
@@ -133,7 +141,7 @@ class SpellCastingTest {
 
         assertEquals(400, target.hp());
         assertEquals(100, caster.mana());
-        assertTrue(target.effects().isEmpty());
+        assertFalse(target.hasActiveEffects());
     }
 
     @Test
@@ -145,11 +153,11 @@ class SpellCastingTest {
 
         tick(target, 49);
         assertEquals(198, target.hp());
-        assertEquals(1, target.effects().size());
+        assertEquals(1, target.activeEffectCount());
 
         tick(target, 1);
         assertEquals(200, target.hp());
-        assertTrue(target.effects().isEmpty());
+        assertFalse(target.hasActiveEffects());
 
         tick(target, 1);
         assertEquals(200, target.hp());
@@ -166,24 +174,26 @@ class SpellCastingTest {
         caster.castSpell(slowHeal, target.x, target.y);
         tick(target, 10);
         caster.castSpell(slowHeal, secondTarget.x, secondTarget.y);
-        assertNotSame(target.effects().get(0), secondTarget.effects().get(0));
+        // The different expiration times below verify independence through behavior.
+        assertEquals(1, target.activeEffectCount());
+        assertEquals(1, secondTarget.activeEffectCount());
 
         tick(target, 40);
         tick(secondTarget, 40);
         assertEquals(200, target.hp());
-        assertTrue(target.effects().isEmpty());
+        assertFalse(target.hasActiveEffects());
         assertEquals(180, secondTarget.hp());
-        assertEquals(1, secondTarget.effects().size());
+        assertEquals(1, secondTarget.activeEffectCount());
 
         tick(secondTarget, 10);
         assertEquals(200, secondTarget.hp());
-        assertTrue(secondTarget.effects().isEmpty());
+        assertFalse(secondTarget.hasActiveEffects());
         assertEquals(76, caster.mana());
 
         caster.castSpell(slowHeal, target.x, target.y);
         tick(target, 1);
         assertEquals(202, target.hp());
-        assertEquals(1, target.effects().size());
+        assertEquals(1, target.activeEffectCount());
         assertEquals(64, caster.mana());
     }
 
@@ -203,7 +213,7 @@ class SpellCastingTest {
         assertEquals(10, target.attackValue());
         assertEquals(5, target.defenseValue());
         assertEquals(9, target.visionRadius());
-        assertTrue(target.effects().isEmpty());
+        assertFalse(target.hasActiveEffects());
 
         tick(target, 1);
         assertEquals(10, target.attackValue());
@@ -222,7 +232,7 @@ class SpellCastingTest {
 
     @Test
     void detectCreaturesSeesThroughWallsUntilItsDurationExpires() {
-        tiles[2][1][0] = Tile.WALL;
+        createWorld(true);
         assertFalse(caster.canSee(target.x, target.y, 0));
 
         caster.castSpell(blueSpell("detect creatures"), caster.x, caster.y);
@@ -233,6 +243,6 @@ class SpellCastingTest {
         assertTrue(caster.canSee(target.x, target.y, 0));
         tick(caster, 1);
         assertFalse(caster.canSee(target.x, target.y, 0));
-        assertTrue(caster.effects().isEmpty());
+        assertFalse(caster.hasActiveEffects());
     }
 }

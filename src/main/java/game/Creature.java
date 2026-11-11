@@ -88,8 +88,10 @@ public class Creature {
 	private int regenHpPer1000;
 	public void modifyRegenHpPer1000(int amount) { regenHpPer1000 += amount; }
 	
-	private List<Effect> effects;
-	public List<Effect> effects(){ return effects; }
+	private final List<Effect> effects;
+	/** Inspects active effects without exposing their mutable lifecycle. */
+	public int activeEffectCount() { return effects.size(); }
+	public boolean hasActiveEffects() { return !effects.isEmpty(); }
 	
 	private int maxMana;
 	public int maxMana() { return maxMana; }
