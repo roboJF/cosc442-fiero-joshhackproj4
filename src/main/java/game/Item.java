@@ -3,6 +3,7 @@ package game;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class Item {
 
@@ -45,8 +46,8 @@ public class Item {
 	private List<Spell> writtenSpells;
 	public List<Spell> writtenSpells() { return writtenSpells; }
 	
-	public void addWrittenSpell(String name, int manaCost, Effect effect){
-		writtenSpells.add(new Spell(name, manaCost, effect));
+	public void addWrittenSpell(String name, int manaCost, Supplier<Effect> effectFactory){
+		writtenSpells.add(new Spell(name, manaCost, effectFactory));
 	}
 	
 	public Item(char glyph, Color color, String name, String appearance){

@@ -318,7 +318,7 @@ public class StuffFactory {
 	
 	public Item newWhiteMagesSpellbook(int depth) {
 		Item item = new Item('+', AsciiPanel.brightWhite, "white mage's spellbook", null);
-		item.addWrittenSpell("minor heal", 4, new Effect(1){
+		item.addWrittenSpell("minor heal", 4, () -> new Effect(1){
 			public void start(Creature creature){
 				if (creature.hp() == creature.maxHp())
 					return;
@@ -328,7 +328,7 @@ public class StuffFactory {
 			}
 		});
 		
-		item.addWrittenSpell("major heal", 8, new Effect(1){
+		item.addWrittenSpell("major heal", 8, () -> new Effect(1){
 			public void start(Creature creature){
 				if (creature.hp() == creature.maxHp())
 					return;
@@ -338,14 +338,14 @@ public class StuffFactory {
 			}
 		});
 		
-		item.addWrittenSpell("slow heal", 12, new Effect(50){
+		item.addWrittenSpell("slow heal", 12, () -> new Effect(50){
 			public void update(Creature creature){
 				super.update(creature);
 				creature.modifyHp(2, "Killed by a slow heal spell?");
 			}
 		});
 
-		item.addWrittenSpell("inner strength", 16, new Effect(50){
+		item.addWrittenSpell("inner strength", 16, () -> new Effect(50){
 			public void start(Creature creature){
 				creature.modifyAttackValue(2);
 				creature.modifyDefenseValue(2);
@@ -375,7 +375,7 @@ public class StuffFactory {
 	public Item newBlueMagesSpellbook(int depth) {
 		Item item = new Item('+', AsciiPanel.brightBlue, "blue mage's spellbook", null);
 
-		item.addWrittenSpell("blood to mana", 1, new Effect(1){
+		item.addWrittenSpell("blood to mana", 1, () -> new Effect(1){
 			public void start(Creature creature){
 				int amount = Math.min(creature.hp() - 1, creature.maxMana() - creature.mana());
 				creature.modifyHp(-amount, "Killed by a blood to mana spell.");
@@ -383,7 +383,7 @@ public class StuffFactory {
 			}
 		});
 		
-		item.addWrittenSpell("blink", 6, new Effect(1){
+		item.addWrittenSpell("blink", 6, () -> new Effect(1){
 			public void start(Creature creature){
 				creature.doAction("fade out");
 				
@@ -404,7 +404,7 @@ public class StuffFactory {
 			}
 		});
 		
-		item.addWrittenSpell("summon bats", 11, new Effect(1){
+		item.addWrittenSpell("summon bats", 11, () -> new Effect(1){
 			public void start(Creature creature){
 				for (int ox = -1; ox < 2; ox++){
 					for (int oy = -1; oy < 2; oy++){
@@ -431,7 +431,7 @@ public class StuffFactory {
 			}
 		});
 		
-		item.addWrittenSpell("detect creatures", 16, new Effect(75){
+		item.addWrittenSpell("detect creatures", 16, () -> new Effect(75){
 			public void start(Creature creature){
 				creature.doAction("look far off into the distance");
 				creature.modifyDetectCreatures(1);

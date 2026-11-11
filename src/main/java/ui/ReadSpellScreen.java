@@ -57,19 +57,15 @@ public class ReadSpellScreen implements Screen {
 	}
 
 	public Screen respondToUserInput(KeyEvent key) {
-		char c = key.getKeyChar();
-
-		Item[] items = player.inventory().getItems();
-		
-		if (letters.indexOf(c) > -1 
-				&& items.length > letters.indexOf(c)
-				&& items[letters.indexOf(c)] != null) {
-			return use(item.writtenSpells().get(letters.indexOf(c)));
-		} else if (key.getKeyCode() == KeyEvent.VK_ESCAPE) {
+		if (key.getKeyCode() == KeyEvent.VK_ESCAPE) {
 			return null;
-		} else {
-			return this;
 		}
+
+		int index = letters.indexOf(key.getKeyChar());
+		if (index >= 0 && index < item.writtenSpells().size()) {
+			return use(item.writtenSpells().get(index));
+		}
+		return this;
 	}
 
 	protected Screen use(Spell spell){
