@@ -73,6 +73,23 @@ class ItemTest {
     }
 
     @Test
+    void thrownAttackAdjustmentsAppearInDetailsUntilRestoredToDefault() {
+        Item rock = new Item('*', Color.WHITE, "rock", null);
+        assertEquals(1, rock.thrownAttackValue());
+        assertFalse(rock.details().contains("thrown:"));
+
+        rock.modifyThrownAttackValue(3);
+
+        assertEquals(4, rock.thrownAttackValue());
+        assertTrue(rock.details().contains("thrown:4"));
+
+        rock.modifyThrownAttackValue(-3);
+
+        assertEquals(1, rock.thrownAttackValue());
+        assertFalse(rock.details().contains("thrown:"));
+    }
+
+    @Test
     void rangedAttackValueTracksAdjustmentsAndAppearsInItemDetails() {
         Item bow = new Item(')', Color.WHITE, "bow", null);
         assertEquals(0, bow.rangedAttackValue());
